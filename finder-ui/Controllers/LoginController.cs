@@ -10,10 +10,30 @@ namespace finder_ui.Controllers
     public class LoginController : Controller
     {
         // GET: Login
-        public ActionResult Login()
+        public ActionResult Login(LoginViewModel vm)
         {
+            using (var client = new UserLoginServiceReference.LoginServiceClient())
+            {
+                //var ExistingUser = new UserLoginServiceReference.Users()
+                //{
+                //    Password = vm.userPassword,
+                //    Username = vm.username,
+                //};
+                
 
-            var CreateAccount = new LoginViewModel();
+               if(client.UserLogin(vm.username, vm.userPassword))
+                {
+                    Session["AuthorizedAsUser"] = "true";
+                    var userid = client.GetActiveUsers().FirstOrDefault(x => x.Email == vm.username).ID;
+                    Session["UserID"] = userid;
+                }
+                else
+                {
+                    Session["AuthorizedAsUser"] = "false";
+                    Session["UserID"] = null;
+                }
+            }
+
             return View();
         }
     }
